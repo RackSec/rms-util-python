@@ -13,8 +13,9 @@ def opaque_id(key, identifier):
     context.
 
     Args:
-        key (six.text_type): URL-safe Base64-encoded HMAC key, at least
-            16 bytes in length.
+        key (six.text_type): URL-safe Base64-encoded HMAC key. The
+            decoded key must provide at least 128 bits (16 bytes)
+            of entropy.
         identifier (six.text_type): Private value to hash.
 
     Returns:
@@ -33,7 +34,7 @@ def opaque_id(key, identifier):
     key_bytes = base64.urlsafe_b64decode(key_b64_bytes)
 
     if len(key_bytes) < 16:
-        raise ValueError('Key must be at least 16 bytes in length')
+        raise ValueError('Decoded key must be at least 16 bytes in length')
 
     digest = hmac.new(key_bytes, msg_bytes, hashlib.sha256).digest()
     encoded_digest = base64.urlsafe_b64encode(digest)
