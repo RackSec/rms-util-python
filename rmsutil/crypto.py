@@ -1,30 +1,41 @@
-import binascii
+import base64
 import hashlib
 import hmac
 
-import six
 
+def opaque_id(key, identifier):
+    """Calculate an opaque ID corresponding to a private identifier.
 
-def hmac_sha256(key, message):
-    """Calculate the HMAC-SHA256 of a message.
+    This function uses HMAC-SHA256 to hash a private identifier to an
+    unpredictable, opaque ID. The hashed ID can be used in place of the
+    original in order to avoid exposing a potentially sensitive value,
+    such as a database table's monotonic primary key, in an insecure
+    context.
 
     Args:
-        key (str): Hexadecimal-encoded signing key. The key must be at
-            least 16 bytes in length.
-        message (str or bytes): Arbitrary message to hash. If a Unicode
-            string, will be encoded as UTF-8 before hashing.
+        key (six.text_type): URL-safe Base64-encoded HMAC key, at least
+            16 bytes in length.
+        identifier (six.text_type): Private value to hash.
 
     Returns:
-        str: Hexadecimal-encoded HMAC of the message
+        six.text_type: 32-byte opaque ID, encoded as a URL-safe Base64
+            string.
     """
 
-    if len(key) < 32:  # 128 / 8 * 2
-        raise ValueError('Key size must be at least 128 bits')
+    # NOTE(kgriffs): The identifier will probably only include simple
+    #   ASCII chars, but encode as UTF-8 just in case.
+    msg_bytes = identifier.encode('utf-8')
 
-    if isinstance(message, six.text_type):
-        msg_bytes = message.encode('utf-8')
-    else:
-        msg_bytes = message
+    # NOTE(kgriffs): Under Python 2.7, base64.urlsafe_b64decode can not
+    #   handle a Unicode string. Py3k can handle either, so we just
+    #   normalize to bytes.
+    key_b64_bytes = key.encode()
+    key_bytes = base64.urlsafe_b64decode(key_b64_bytes)
 
-    key_bytes = binascii.unhexlify(key)
-    return hmac.new(key_bytes, msg_bytes, hashlib.sha256).hexdigest()
+    if len(key_bytes) < 16:
+        raise ValueError('Key must be at least 16 bytes in length')
+
+    digest = hmac.new(key_bytes, msg_bytes, hashlib.sha256).digest()
+    encoded_digest = base64.urlsafe_b64encode(digest)
+
+    return encoded_digest.decode()
