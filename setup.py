@@ -6,12 +6,11 @@ setup(
     name='rmsutil',
     version=version,
     description='Common utilities used in RMS projects',
-    author='Kurt Griffiths',
-    author_email='kurt.griffiths@rackspace.com',
+    author='Rackspace',
+    author_email='',
     url='',
-    license='Proprietary',
+    license='Apache 2.0',
     packages=find_packages(),
     install_requires=[
-        'six'
     ],
 )
