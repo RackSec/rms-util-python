@@ -2,6 +2,8 @@ import contextlib
 import os
 import sys
 
+import six
+
 
 @contextlib.contextmanager
 def push_env(**kwargs):
@@ -49,6 +51,11 @@ def push_argv(*args):
         *args: A list of strings to append to sys.argv
 
     """
+
+    # NOTE(kgriffs): argparse is OK with args of type unicode,
+    #   so push_argv isn't strict about it either.
+    if not all(isinstance(arg, six.string_types) for arg in args):
+        raise TypeError('All args must be strings')
 
     old_argv, sys.argv = sys.argv, sys.argv[:1]
     sys.argv.extend(args)

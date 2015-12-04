@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import os
 
 import pytest
@@ -16,7 +14,7 @@ def test_push_env():
     assert_absent()
 
     with rmsutil.system.push_env(
-        OLIVAW_HOST='127.0.0.1',
+        OLIVAW_HOST=u'127.0.0.1',  # os._Environ allows type unicode
         OLIVAW_USERNAME='user',
         OLIVAW_PASSWORD='pwd',
     ):
@@ -55,3 +53,9 @@ def test_push_env_raises():
             raise Exception()
 
     assert 'OLIVAW_HOST' not in os.environ
+
+
+def test_push_env_requires_string_values():
+    with pytest.raises(TypeError):
+        with rmsutil.system.push_env(NAME=1234):
+            pass

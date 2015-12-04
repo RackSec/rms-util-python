@@ -12,5 +12,6 @@ setup(
     license='Apache 2.0',
     packages=find_packages(),
     install_requires=[
+        'six',
     ],
 )
