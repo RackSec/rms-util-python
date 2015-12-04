@@ -5,7 +5,7 @@ import pytest
 import rmsutil.system
 
 
-def test_push_env():
+def test_update_env():
     def assert_absent():
         assert 'OLIVAW_HOST' not in os.environ
         assert 'OLIVAW_USERNAME' not in os.environ
@@ -13,7 +13,7 @@ def test_push_env():
 
     assert_absent()
 
-    with rmsutil.system.push_env(
+    with rmsutil.system.update_env(
         OLIVAW_HOST=u'127.0.0.1',  # os._Environ allows type unicode
         OLIVAW_USERNAME='user',
         OLIVAW_PASSWORD='pwd',
@@ -22,7 +22,7 @@ def test_push_env():
         assert os.environ['OLIVAW_USERNAME'] == 'user'
         assert os.environ['OLIVAW_PASSWORD'] == 'pwd'
 
-        with rmsutil.system.push_env(OLIVAW_PASSWORD='overridden'):
+        with rmsutil.system.update_env(OLIVAW_PASSWORD='overridden'):
             assert os.environ['OLIVAW_PASSWORD'] == 'overridden'
 
         assert os.environ['OLIVAW_PASSWORD'] == 'pwd'
@@ -31,7 +31,7 @@ def test_push_env():
 
 
 def test_no_side_effects():
-    with rmsutil.system.push_env(OLIVAW_TEST_VALUE='abcd'):
+    with rmsutil.system.update_env(OLIVAW_TEST_VALUE='abcd'):
         pass
 
     os.environ['OLIVAW_TEST_VALUE'] = '1234'
@@ -44,9 +44,9 @@ def test_no_side_effects():
         os.environ['OLIVAW_TEST_VALUE'] = 1234
 
 
-def test_push_env_raises():
+def test_update_env_raises():
     with pytest.raises(Exception):
-        with rmsutil.system.push_env(
+        with rmsutil.system.update_env(
             OLIVAW_HOST='127.0.0.1',
         ):
             assert os.environ['OLIVAW_HOST'] == '127.0.0.1'
@@ -55,7 +55,7 @@ def test_push_env_raises():
     assert 'OLIVAW_HOST' not in os.environ
 
 
-def test_push_env_requires_string_values():
+def test_update_env_requires_string_values():
     with pytest.raises(TypeError):
-        with rmsutil.system.push_env(NAME=1234):
+        with rmsutil.system.update_env(NAME=1234):
             pass

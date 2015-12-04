@@ -6,8 +6,13 @@ import six
 
 
 @contextlib.contextmanager
-def push_env(**kwargs):
-    """Temporarily modify os.environ within a given context.
+def update_env(**kwargs):
+    """Temporarily modifies os.environ within a given context.
+
+    Upon entering the context, os.environ is updated with the values
+    specified. If an environment variable is already present, it will
+    be temporarily overwritten. The environment is restored once
+    execution leaves the context.
 
     Args:
         **kwargs: An arbitrary list of names and values to set in
@@ -44,11 +49,17 @@ def push_env(**kwargs):
 
 
 @contextlib.contextmanager
-def push_argv(*args):
-    """Temporarily extend sys.argv with additional arguments.
+def override_argv(*args):
+    """Temporarily overrides the contents of sys.argv.
+
+    Upon entering the context, the arguments in sys.argv are replaced
+    with those specified, except for the process name which remains
+    static. The original arguments are restored once execution leaves
+    the context.
 
     Args:
-        *args: A list of strings to append to sys.argv
+        *args: A list of strings to append to sys.argv immediately
+            following the process name.
 
     """
 
@@ -57,8 +68,7 @@ def push_argv(*args):
     if not all(isinstance(arg, six.string_types) for arg in args):
         raise TypeError('All args must be strings')
 
-    old_argv, sys.argv = sys.argv, sys.argv[:1]
-    sys.argv.extend(args)
+    old_argv, sys.argv = sys.argv, sys.argv[:1] + list(args)
 
     try:
         yield
