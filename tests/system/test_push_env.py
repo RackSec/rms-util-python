@@ -32,6 +32,20 @@ def test_push_env():
     assert_absent()
 
 
+def test_no_side_effects():
+    with rmsutil.system.push_env(OLIVAW_TEST_VALUE='abcd'):
+        pass
+
+    os.environ['OLIVAW_TEST_VALUE'] = '1234'
+    assert os.getenv('OLIVAW_TEST_VALUE') == '1234'
+
+    del os.environ['OLIVAW_TEST_VALUE']
+    assert os.getenv('OLIVAW_TEST_VALUE') is None
+
+    with pytest.raises(TypeError):
+        os.environ['OLIVAW_TEST_VALUE'] = 1234
+
+
 def test_push_env_raises():
     with pytest.raises(Exception):
         with rmsutil.system.push_env(
